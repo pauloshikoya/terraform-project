@@ -4,6 +4,7 @@ provider "aws" {
   secret_key = "f7u92MKuHtGMOPGvymtZ6VxlsNFOvvY1HnFb00Kr"
 }
 
+# Module S3 bucket
 module "s3_platform_bucket" {
   source = "../../modules/s3"
 
