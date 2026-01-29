@@ -1,3 +1,53 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:565350a490c83b73e8968c5878ec064fc33da5a8ed1803060d4c80ac90f20c49
-size 1150
+name: Terraform Dev
+
+on:
+  pull_request:
+    paths:
+      - "modules/**"
+      - "environments/dev/**"
+  push:
+    branches:
+      - main
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  terrraform:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: environments/dev
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::603974305458:role/github-terraform-platform-role
+          aws-region: eu-west-2
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.6.6
+
+      - name: Terraform Init
+        run: terraform init
+
+      - name: Terraform Format
+        run: terraform fmt -check
+
+      - name: Terraform Validate
+        run: terraform validate 
+
+      - name: Terraform Plan
+        run: terraform plan
+
+      - name: Terraform Apply
+        if: github.ref == 'refs/heads.main'
+        run: terraform apply -auto-approve
